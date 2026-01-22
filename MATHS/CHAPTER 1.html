@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class 7 Geometry: Parallel Lines Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Minimal Custom CSS for Chart Containers -->
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .angle-badge {
+            transition: all 0.3s ease;
+        }
+        .nav-item.active {
+            background-color: #e7e5e4; /* stone-200 */
+            border-left: 4px solid #4f46e5; /* indigo-600 */
+            color: #1c1917;
+            font-weight: 700;
+        }
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #d6d3d1;
+            border-radius: 2px;
+        }
+    </style>
+
+    <!-- Placeholder Comments Required -->
+    <!-- Chosen Palette: Warm Neutrals (Stone/Beige) with Indigo Primary and Amber/Emerald Accents for geometric highlights. Designed for a calm learning environment. -->
+    
+    <!-- Application Structure Plan: 
+         The app is designed as a "Virtual Lab" with a sidebar navigation that guides the learner through the chapter progression: 
+         1. Concept (Definition) -> 2. Interaction (Intersecting Lines) -> 3. Analysis (Transversal Rules) -> 4. Synthesis (Triangle Property) -> 5. Assessment (Quiz).
+         A 'Dashboard' layout is used where the left side explains the theory and the right side offers a dynamic Chart.js visualization. 
+         This structure promotes "Learn by Doing" - the user reads a rule, then tweaks a slider to prove it true visually.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Intersecting Lines: Represented via Chart.js Scatter plot with 'showLine: true'. 
+            - Goal: Show vertical angles are equal.
+            - Interaction: Slider rotates the lines.
+         2. The Transversal: Chart.js Scatter plot with 3 datasets (2 parallel, 1 crossing).
+            - Goal: Visualize Z and F angles.
+            - Interaction: Buttons to highlight specific angle pairs (changing point colors).
+         3. Triangle Sum: Chart.js Scatter plot forming a triangle.
+            - Goal: Prove 180-degree rule.
+            - Interaction: Input boxes for 2 angles, auto-calculate 3rd.
+         4. Quiz: JavaScript-based multiple choice form.
+         - Justification: Chart.js allows precise coordinate plotting for geometry while maintaining responsiveness. No SVG or Mermaid used.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="text-stone-800 antialiased h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-white border-r border-stone-200 flex-shrink-0 flex flex-col h-full overflow-y-auto z-20 shadow-lg md:shadow-none">
+        <div class="p-6 border-b border-stone-100 bg-stone-50">
+            <h1 class="text-2xl font-bold text-indigo-700">Geometry Lab</h1>
+            <p class="text-sm text-stone-500 mt-1">Class 7: Parallel Lines</p>
+        </div>
+        <nav class="flex-1 py-4 space-y-1">
+            <button onclick="navigate('intro')" id="nav-intro" class="nav-item w-full text-left px-6 py-3 text-stone-600 hover:bg-stone-50 transition-colors flex items-center">
+                <span class="mr-3 text-xl">📏</span> Basics
+            </button>
+            <button onclick="navigate('intersecting')" id="nav-intersecting" class="nav-item w-full text-left px-6 py-3 text-stone-600 hover:bg-stone-50 transition-colors flex items-center">
+                <span class="mr-3 text-xl">✂️</span> Intersecting Lines
+            </button>
+            <button onclick="navigate('transversal')" id="nav-transversal" class="nav-item w-full text-left px-6 py-3 text-stone-600 hover:bg-stone-50 transition-colors flex items-center">
+                <span class="mr-3 text-xl">🛤️</span> The Transversal
+            </button>
+            <button onclick="navigate('triangles')" id="nav-triangles" class="nav-item w-full text-left px-6 py-3 text-stone-600 hover:bg-stone-50 transition-colors flex items-center">
+                <span class="mr-3 text-xl">🔺</span> Triangle Angles
+            </button>
+            <button onclick="navigate('quiz')" id="nav-quiz" class="nav-item w-full text-left px-6 py-3 text-stone-600 hover:bg-stone-50 transition-colors flex items-center">
+                <span class="mr-3 text-xl">📝</span> Quiz Zone
+            </button>
+        </nav>
+        <div class="p-4 bg-indigo-50 m-4 rounded-lg">
+            <p class="text-xs text-indigo-800 font-semibold">Teacher's Note:</p>
+            <p class="text-xs text-indigo-700 mt-1">Use this tool to demonstrate how angles change dynamically. Ask students to predict values before moving sliders.</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto relative scroll-smooth bg-stone-50">
+        
+        <!-- Intro / Basics Section -->
+        <section id="intro" class="page-section min-h-full p-6 md:p-10 max-w-5xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-4">Part 1: The Basics of Parallel Lines</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mb-6">
+                    <p class="text-lg text-stone-700 leading-relaxed mb-4">
+                        Imagine railway tracks. They run side by side, never meeting, and the distance between them is always the same. In geometry, we call these <strong>Parallel Lines</strong>.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <span class="bg-green-100 text-green-800 rounded-full px-2 py-1 text-xs font-bold mr-3 mt-1">FACT 1</span>
+                                    <span>They never intersect (cross each other).</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="bg-blue-100 text-blue-800 rounded-full px-2 py-1 text-xs font-bold mr-3 mt-1">FACT 2</span>
+                                    <span>The distance between them is constant.</span>
+                                </li>
+                            </ul>
+                            <div class="mt-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r">
+                                <p class="text-sm text-amber-900 font-medium">Try This:</p>
+                                <p class="text-sm text-amber-800">Look around you. Can you find parallel lines? (Hint: Door frames, notebook lines, floor tiles)</p>
+                            </div>
+                        </div>
+                        <div class="bg-stone-100 rounded-lg p-4 flex flex-col items-center justify-center border border-stone-200">
+                            <!-- Simple HTML Visual for Parallel Lines -->
+                            <div class="w-full h-32 relative flex flex-col justify-center space-y-8 px-8">
+                                <div class="w-full h-1 bg-indigo-500 relative">
+                                    <span class="absolute -top-6 left-0 text-xs text-indigo-500 font-mono">Line A</span>
+                                </div>
+                                <div class="w-full h-1 bg-indigo-500 relative">
+                                    <span class="absolute -bottom-6 left-0 text-xs text-indigo-500 font-mono">Line B</span>
+                                    <!-- Distance Marker -->
+                                    <div class="absolute -top-8 right-10 h-8 border-l border-dashed border-stone-400"></div>
+                                    <div class="absolute -top-8 right-10 flex items-center justify-center w-full h-8">
+                                        <span class="text-xs text-stone-500 bg-stone-100 px-1">Same Distance</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="navigate('intersecting')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow transition-transform transform hover:-translate-y-0.5">Next: Intersecting Lines &rarr;</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Intersecting Lines Section -->
+        <section id="intersecting" class="page-section hidden min-h-full p-6 md:p-10 max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold text-stone-800 mb-2">Part 2: When Two Lines Cross</h2>
+            <p class="text-stone-600 mb-8">Experiment with the "Scissors Rule". When lines cross, they form 4 angles with a special relationship.</p>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Controls & Info -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="font-bold text-lg mb-4 text-indigo-700">Control the Angle</h3>
+                        <label class="block text-sm font-medium text-stone-500 mb-2">Rotate the Lines</label>
+                        <input type="range" id="intersectSlider" min="10" max="170" value="60" class="w-full mb-4">
+                        <div class="flex justify-between text-sm font-mono font-bold text-stone-700">
+                            <span>Input: <span id="intersectVal" class="text-indigo-600">60°</span></span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="font-bold text-lg mb-2">The Rules</h3>
+                        <ul class="space-y-4 text-sm">
+                            <li class="p-3 bg-emerald-50 rounded border border-emerald-100">
+                                <strong class="block text-emerald-800">Opposite Angles are Equal</strong>
+                                <span class="text-stone-600">Top = Bottom, Left = Right. Just like scissors opening.</span>
+                            </li>
+                            <li class="p-3 bg-blue-50 rounded border border-blue-100">
+                                <strong class="block text-blue-800">Neighbors add to 180°</strong>
+                                <span class="text-stone-600">Any two angles next to each other form a straight line.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-stone-200 flex flex-col justify-center">
+                    <div class="chart-container">
+                        <canvas id="intersectChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4 text-center">
+                        <div class="bg-stone-50 p-2 rounded">
+                            <span class="block text-xs text-stone-500 uppercase">Small Angles</span>
+                            <span id="smallAngleDisplay" class="text-xl font-bold text-emerald-600">60°</span>
+                        </div>
+                        <div class="bg-stone-50 p-2 rounded">
+                            <span class="block text-xs text-stone-500 uppercase">Large Angles</span>
+                            <span id="largeAngleDisplay" class="text-xl font-bold text-blue-600">120°</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between mt-8">
+                <button onclick="navigate('intro')" class="text-stone-500 hover:text-stone-800 font-medium">&larr; Back</button>
+                <button onclick="navigate('transversal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow">Next: The Transversal &rarr;</button>
+            </div>
+        </section>
+
+        <!-- Transversal Section -->
+        <section id="transversal" class="page-section hidden min-h-full p-6 md:p-10 max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold text-stone-800 mb-2">Part 3: The Transversal</h2>
+            <p class="text-stone-600 mb-8">A "Transversal" is a line that cuts across parallel lines. It creates 8 angles with magical connections.</p>
+
+            <div class="grid lg:grid-cols-12 gap-6">
+                <!-- Sidebar Controls -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Adjust Slant</label>
+                        <input type="range" id="transversalSlider" min="20" max="160" value="70" class="w-full">
+                        <div class="text-center mt-2 font-mono text-indigo-600 font-bold" id="transversalVal">70°</div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-wider">Highlight Rules</p>
+                        <button onclick="highlightTransversal('none')" class="w-full text-left px-4 py-3 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-sm font-medium transition-colors focus:ring-2 ring-indigo-500">
+                            Reset Colors
+                        </button>
+                        <button onclick="highlightTransversal('z')" class="w-full text-left px-4 py-3 rounded-lg border border-l-4 border-l-indigo-500 border-stone-200 bg-white hover:bg-indigo-50 text-sm transition-colors group">
+                            <span class="font-bold text-indigo-700 block">Show 'Z' Angles</span>
+                            <span class="text-xs text-stone-500">Alternate Interior Angles are Equal</span>
+                        </button>
+                        <button onclick="highlightTransversal('f')" class="w-full text-left px-4 py-3 rounded-lg border border-l-4 border-l-emerald-500 border-stone-200 bg-white hover:bg-emerald-50 text-sm transition-colors group">
+                            <span class="font-bold text-emerald-700 block">Show 'F' Angles</span>
+                            <span class="text-xs text-stone-500">Corresponding Angles are Equal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="lg:col-span-8 bg-white p-4 rounded-xl shadow-sm border border-stone-200 flex flex-col justify-center relative">
+                    <div class="absolute top-4 right-4 bg-stone-100 px-3 py-1 rounded text-xs font-mono text-stone-500">
+                        Parallel Lines: y = 2, y = -2
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="transversalChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4 bg-stone-50 p-4 rounded-lg">
+                         <div class="text-center">
+                             <h4 class="text-xs uppercase text-stone-500 font-bold">Small Angle</h4>
+                             <p id="tSmall" class="text-2xl font-bold text-indigo-600">70°</p>
+                         </div>
+                         <div class="text-center">
+                             <h4 class="text-xs uppercase text-stone-500 font-bold">Large Angle</h4>
+                             <p id="tLarge" class="text-2xl font-bold text-orange-600">110°</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="navigate('intersecting')" class="text-stone-500 hover:text-stone-800 font-medium">&larr; Back</button>
+                <button onclick="navigate('triangles')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow">Next: Triangles &rarr;</button>
+            </div>
+        </section>
+
+        <!-- Triangles Section -->
+        <section id="triangles" class="page-section hidden min-h-full p-6 md:p-10 max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold text-stone-800 mb-2">Part 4: Angles in a Triangle</h2>
+            <p class="text-stone-600 mb-8">The most powerful rule: No matter the shape, the sum of all angles in a triangle is <strong>always 180°</strong>.</p>
+
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-bold mb-6 text-stone-800">Triangle Calculator</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">Angle A (Left)</label>
+                            <div class="flex items-center">
+                                <input type="number" id="angleA" value="60" min="1" max="178" oninput="updateTriangle()" class="w-full p-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow">
+                                <span class="ml-2 text-stone-500 font-bold">°</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">Angle B (Right)</label>
+                            <div class="flex items-center">
+                                <input type="number" id="angleB" value="60" min="1" max="178" oninput="updateTriangle()" class="w-full p-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow">
+                                <span class="ml-2 text-stone-500 font-bold">°</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-stone-100">
+                            <label class="block text-sm font-bold text-stone-500 uppercase tracking-wide mb-1">Angle C (Top) is automatically:</label>
+                            <div class="text-4xl font-bold text-indigo-600 animate-pulse" id="angleC">60°</div>
+                            <p class="text-sm text-stone-400 mt-1">Formula: 180 - (A + B)</p>
+                            <p id="triError" class="text-red-500 text-sm font-bold mt-2 hidden">⚠️ Sum exceeds 179°! Triangle impossible.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+                    <div class="chart-container">
+                        <canvas id="triangleChart"></canvas>
+                    </div>
+                    <div class="mt-4 p-4 bg-yellow-50 rounded border border-yellow-100 text-sm text-yellow-800">
+                        <strong>Did you know?</strong> If you draw a line inside a triangle parallel to the base, the small top triangle has the exact same angles as the big triangle!
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="navigate('transversal')" class="text-stone-500 hover:text-stone-800 font-medium">&larr; Back</button>
+                <button onclick="navigate('quiz')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow">Next: Take the Quiz &rarr;</button>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="page-section hidden min-h-full p-6 md:p-10 max-w-3xl mx-auto">
+            <h2 class="text-3xl font-bold text-stone-800 mb-6">Final Challenge</h2>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-stone-200">
+                <div class="bg-indigo-600 p-6">
+                    <p class="text-indigo-100 text-sm uppercase font-bold tracking-wider">Knowledge Check</p>
+                    <h3 class="text-white text-2xl font-bold">Can you solve these?</h3>
+                </div>
+                
+                <div class="p-8 space-y-8" id="quizContainer">
+                    
+                    <!-- Q1 -->
+                    <div class="quiz-item">
+                        <p class="font-bold text-lg text-stone-800 mb-3">1. If two parallel lines are extended forever, will they ever meet?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q1" value="yes" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">Yes, eventually</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q1" value="no" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">No, never</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="quiz-item">
+                        <p class="font-bold text-lg text-stone-800 mb-3">2. In a triangle, one angle is 70° and another is 50°. What is the third angle?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q2" value="40" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">40°</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q2" value="60" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">60°</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q2" value="90" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">90°</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="quiz-item">
+                        <p class="font-bold text-lg text-stone-800 mb-3">3. When a transversal cuts parallel lines, the "Z" shape angles (Alternate Interior) are:</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q3" value="equal" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">Equal</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded hover:bg-stone-50 cursor-pointer">
+                                <input type="radio" name="q3" value="180" class="h-5 w-5 text-indigo-600">
+                                <span class="ml-3 text-stone-700">Add up to 180°</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button onclick="checkQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-lg shadow-lg transition-transform transform hover:-translate-y-1">Submit Answers</button>
+                    </div>
+
+                    <div id="quizResult" class="hidden p-4 rounded-lg bg-stone-100 text-center">
+                        <h4 class="text-xl font-bold mb-2">Your Score: <span id="scoreVal">0</span>/3</h4>
+                        <p id="scoreMsg" class="text-stone-600"></p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="flex justify-start mt-8">
+                <button onclick="navigate('triangles')" class="text-stone-500 hover:text-stone-800 font-medium">&larr; Review Triangles</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const state = {
+            intersectAngle: 60,
+            transversalAngle: 70,
+            triangleA: 60,
+            triangleB: 60,
+            highlightMode: 'none' // 'none', 'z', 'f'
+        };
+
+        // --- Chart Instances ---
+        let intersectChartInstance = null;
+        let transversalChartInstance = null;
+        let triangleChartInstance = null;
+
+        // --- Navigation ---
+        function navigate(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+            // Show target
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update Nav Styles
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + sectionId).classList.add('active');
+
+            // Resize charts if necessary when becoming visible
+            if(sectionId === 'intersecting' && intersectChartInstance) intersectChartInstance.resize();
+            if(sectionId === 'transversal' && transversalChartInstance) transversalChartInstance.resize();
+            if(sectionId === 'triangles' && triangleChartInstance) triangleChartInstance.resize();
+        }
+
+        // --- Initialization ---
+        window.onload = function() {
+            initIntersectChart();
+            initTransversalChart();
+            initTriangleChart();
+            
+            // Default Nav
+            document.getElementById('nav-intro').classList.add('active');
+        };
+
+        // --- Geometry Helpers ---
+        function toRad(deg) { return deg * (Math.PI / 180); }
+        
+        // --- 1. Intersecting Chart Logic ---
+        function initIntersectChart() {
+            const ctx = document.getElementById('intersectChart').getContext('2d');
+            
+            intersectChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Line 1',
+                            borderColor: '#4f46e5', // Indigo
+                            borderWidth: 3,
+                            showLine: true,
+                            pointRadius: 0,
+                            data: [] // Filled dynamically
+                        },
+                        {
+                            label: 'Line 2',
+                            borderColor: '#059669', // Emerald
+                            borderWidth: 3,
+                            showLine: true,
+                            pointRadius: 0,
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    scales: {
+                        x: { min: -5, max: 5, grid: { display: false }, ticks: { display: false } },
+                        y: { min: -5, max: 5, grid: { display: false }, ticks: { display: false } }
+                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+
+            updateIntersectChart(60);
+            
+            // Listener
+            document.getElementById('intersectSlider').addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                document.getElementById('intersectVal').innerText = val + "°";
+                document.getElementById('smallAngleDisplay').innerText = val + "°";
+                document.getElementById('largeAngleDisplay').innerText = (180 - val) + "°";
+                updateIntersectChart(val);
+            });
+        }
+
+        function updateIntersectChart(angle) {
+            // Line 1 is always fixed horizontal for simplicity, or we rotate both.
+            // Let's rotate both relative to center to look like "scissors".
+            const rad = toRad(angle);
+            const length = 4;
+            
+            // Calculate offsets
+            // Line 1: angled at +angle/2
+            // Line 2: angled at -angle/2 (actually 180 - angle/2)
+            // Wait, standard scissors: Line 1 fixed at 0, Line 2 at angle?
+            // Let's do: Line 1 at -(angle/2) and Line 2 at +(angle/2) relative to X axis implies angle between is 'angle'.
+            
+            const halfAngle = rad / 2;
+            
+            const x1 = Math.cos(halfAngle) * length;
+            const y1 = Math.sin(halfAngle) * length;
+            
+            // Dataset 0: Positive slope
+            intersectChartInstance.data.datasets[0].data = [
+                {x: -x1, y: -y1}, {x: x1, y: y1}
+            ];
+
+            // Dataset 1: Negative slope (mirror)
+            intersectChartInstance.data.datasets[1].data = [
+                {x: -x1, y: y1}, {x: x1, y: -y1}
+            ];
+            
+            intersectChartInstance.update();
+        }
+
+        // --- 2. Transversal Chart Logic ---
+        function initTransversalChart() {
+            const ctx = document.getElementById('transversalChart').getContext('2d');
+            
+            transversalChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Top Parallel',
+                            borderColor: '#1c1917', // Black/Stone
+                            borderWidth: 2,
+                            showLine: true,
+                            pointRadius: 0,
+                            data: [{x: -5, y: 2}, {x: 5, y: 2}]
+                        },
+                        {
+                            label: 'Bottom Parallel',
+                            borderColor: '#1c1917',
+                            borderWidth: 2,
+                            showLine: true,
+                            pointRadius: 0,
+                            data: [{x: -5, y: -2}, {x: 5, y: -2}]
+                        },
+                        {
+                            label: 'Transversal',
+                            borderColor: '#ea580c', // Orange
+                            borderWidth: 3,
+                            showLine: true,
+                            pointRadius: 0,
+                            data: [] // Dynamic
+                        },
+                        // Points for highlighting angles
+                        {
+                            label: 'Highlights',
+                            type: 'scatter',
+                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                            pointRadius: 8,
+                            data: [] 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { min: -4, max: 4, display: false },
+                        y: { min: -4, max: 4, display: false }
+                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+
+            updateTransversalChart(70);
+
+            document.getElementById('transversalSlider').addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                state.transversalAngle = val;
+                document.getElementById('transversalVal').innerText = val + "°";
+                document.getElementById('tSmall').innerText = val + "°";
+                document.getElementById('tLarge').innerText = (180 - val) + "°";
+                updateTransversalChart(val);
+            });
+        }
+
+        function updateTransversalChart(angle) {
+            // Transversal cuts through (0,0).
+            // y = tan(angle) * x
+            // We need points where y = 4 (top) and y = -4 (bottom) to ensure it covers the parallel lines at y=2,-2
+            const rad = toRad(angle);
+            // x = y / tan(rad)
+            // Avoid 90 deg infinity
+            let xTop, xBot;
+            if (Math.abs(angle - 90) < 1) {
+                xTop = 0; xBot = 0;
+            } else {
+                xTop = 3.5 / Math.tan(rad);
+                xBot = -3.5 / Math.tan(rad);
+            }
+
+            // Dataset 2 is transversal
+            transversalChartInstance.data.datasets[2].data = [
+                {x: -xTop, y: -3.5}, {x: xTop, y: 3.5}
+            ];
+
+            // Update Highlights based on mode
+            updateTransversalHighlights(angle);
+
+            transversalChartInstance.update();
+        }
+
+        function highlightTransversal(mode) {
+            state.highlightMode = mode;
+            updateTransversalHighlights(state.transversalAngle);
+            transversalChartInstance.update();
+        }
+
+        function updateTransversalHighlights(angle) {
+            // Calculate intersection points
+            // Line 1: y = 2. Line 2: y = -2.
+            // Transversal: passes (0,0). Slope m = tan(angle). y = mx. x = y/m.
+            const rad = toRad(angle);
+            const m = Math.tan(rad);
+            
+            const xTop = 2 / m;  // Intersection with top line
+            const xBot = -2 / m; // Intersection with bottom line
+
+            const ds = transversalChartInstance.data.datasets[3];
+            ds.data = []; // clear
+
+            if (state.highlightMode === 'z') {
+                // Alternate Interior: Top-Right (obtuse if <90) vs Bottom-Left.
+                // Or Top-Left (acute) vs Bottom-Right.
+                // Let's highlight the ACUTE angles (Inner) forming Z.
+                // Inner Left Top, Inner Right Bottom.
+                ds.backgroundColor = '#4f46e5'; // Indigo
+                // Visual marker points slightly offset from intersection
+                ds.data = [
+                    {x: xTop - 0.5, y: 1.8}, // Top inner left area
+                    {x: xBot + 0.5, y: -1.8} // Bottom inner right area
+                ];
+            } else if (state.highlightMode === 'f') {
+                // Corresponding: Top Right and Bottom Right.
+                ds.backgroundColor = '#059669'; // Emerald
+                ds.data = [
+                    {x: xTop + 0.5, y: 2.2}, // Top outer right
+                    {x: xBot + 0.5, y: -1.8} // Bottom inner right
+                ];
+            }
+        }
+
+        // --- 3. Triangle Chart Logic ---
+        function initTriangleChart() {
+            const ctx = document.getElementById('triangleChart').getContext('2d');
+            
+            triangleChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Triangle',
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                        borderWidth: 3,
+                        showLine: true,
+                        fill: true,
+                        data: []
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { min: -1, max: 11, display: false },
+                        y: { min: -1, max: 10, display: false }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            updateTriangle();
+        }
+
+        function updateTriangle() {
+            const a = parseInt(document.getElementById('angleA').value) || 1;
+            const b = parseInt(document.getElementById('angleB').value) || 1;
+            const c = 180 - (a + b);
+
+            const errDiv = document.getElementById('triError');
+            const cDisplay = document.getElementById('angleC');
+
+            if (c <= 0) {
+                errDiv.classList.remove('hidden');
+                cDisplay.innerText = "Error";
+                return;
+            } else {
+                errDiv.classList.add('hidden');
+                cDisplay.innerText = c + "°";
+            }
+
+            // Draw Triangle
+            // Point A at (0,0)
+            // Point B at (10, 0) (Base length 10)
+            // Point C at (x, y). 
+            // We know base is 10. Angle at A is 'a'. Angle at B is 'b'.
+            // Height y = x * tan(A). Also y = (10-x) * tan(B).
+            // x * tanA = (10-x) * tanB
+            // x(tanA + tanB) = 10 * tanB
+            // x = (10 * tanB) / (tanA + tanB)
+            
+            const rA = toRad(a);
+            const rB = toRad(b);
+            const tanA = Math.tan(rA);
+            const tanB = Math.tan(rB);
+            
+            const xC = (10 * tanB) / (tanA + tanB);
+            const yC = xC * tanA;
+
+            triangleChartInstance.data.datasets[0].data = [
+                {x: 0, y: 0},
+                {x: 10, y: 0},
+                {x: xC, y: yC},
+                {x: 0, y: 0} // close loop
+            ];
+            
+            // Adjust scale to fit height
+            triangleChartInstance.options.scales.y.max = Math.max(yC + 2, 5);
+            triangleChartInstance.update();
+        }
+
+        // --- Quiz Logic ---
+        function checkQuiz() {
+            let score = 0;
+            const q1 = document.querySelector('input[name="q1"]:checked')?.value;
+            const q2 = document.querySelector('input[name="q2"]:checked')?.value;
+            const q3 = document.querySelector('input[name="q3"]:checked')?.value;
+
+            if (q1 === 'no') score++;
+            if (q2 === '60') score++;
+            if (q3 === 'equal') score++;
+
+            const resultDiv = document.getElementById('quizResult');
+            const scoreVal = document.getElementById('scoreVal');
+            const scoreMsg = document.getElementById('scoreMsg');
+
+            resultDiv.classList.remove('hidden');
+            scoreVal.innerText = score;
+
+            if(score === 3) {
+                resultDiv.className = "p-4 rounded-lg bg-green-100 text-center border border-green-200";
+                scoreMsg.innerText = "Perfect! You are a Geometry Master! 🎉";
+            } else if (score >= 1) {
+                resultDiv.className = "p-4 rounded-lg bg-yellow-100 text-center border border-yellow-200";
+                scoreMsg.innerText = "Good try! Review the sections and try again.";
+            } else {
+                resultDiv.className = "p-4 rounded-lg bg-red-100 text-center border border-red-200";
+                scoreMsg.innerText = "Oops! Go back and play with the lines some more.";
+            }
+        }
+    </script>
+</body>
+</html>
